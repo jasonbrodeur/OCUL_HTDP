@@ -1,0 +1,277 @@
+function [logfile] = georef_rewarp(series_label, georef_list)
+% georef_rewarp.m
+% This function runs through a collection of maps sheets (whether 1:25000 or 1:63360, as specified by series_label),
+% looks for corresponding gcp files--and where they exist, performs georeferencing and georectification.
+%%% inputs:
+% series_label: string input for series scale -- either '25000' or '63360'
+% georef_list: file name of a single column list of filenames for sheets to be processed (optional); file must exist in the master_path directory 
+% (i.e. /AutoGeoref/1_25000/ or /AutoGeoref/1_63360/ 
+% where georef_list is not provided, the function works through the entire 
+
+
+if nargin == 0
+    disp(['The variable ''series_label'' needs to be set to ''63360'' or ''25000''. Exiting.']);
+    break
+elseif nargin == 1
+    dir_flag = 1 % if only one argument (series label) is provided, then run through the entire /tif directory
+else
+    dir_flag = 0; % if a list is provided, the function will run through all filenames provided in the list.
+    end
+
+%% Variables
+% variables -- these could be set in a function call (since s_srs and t_srs may not be constant).
+h_loadflag = 0; % flag to load image heights from variable 'h.mat'. When set to 1 it loads variables; otherwise, the script will use the imagemagick 'identify' command to get the height
+ppi_in = 600; %native resolution of the images;
+%ppi_in = 456.933;%600; %native resolution of the images;
+ppi_out = 300; %output resolution for the transformed image;
+gcp_fmt = '%f %f %f %f'; %input format for the Arc GCP files
+%series_label = '63360'; %'25000' %Change this value to change the series.
+%series_label = '25000';
+
+%% Paths
+%master_path = '/media/brodeujj/KINGSTON/AutoGeorefTests/';
+if ispc==1
+master_path = ['E:\Users\brodeujj\GIS\OCUL Topo Project\AutoGeoRef\1_' series_label '\'];
+else
+master_path = ['/media/Stuff/AutoGeoRef/1_' series_label '/'];
+end
+
+gcp_path = [master_path 'GCP-Upload/'];
+tif_path = [master_path 'tif/'];
+qgis_gcp_path = [master_path 'GCP-QGIS/'];
+tiles_path = [master_path 'tiles/'];
+
+%% Series-specific settings:
+switch series_label
+  case '63360'
+  SRS_find_flag = 1;
+    s_srs = ''; %This may have to be incorporated into a loop:
+%    t_srs = {'3857';'3162'};%'EPSG:3162';% can be a cell array (gdalwarp loops through these)
+    t_srs = {''}; % 
+    geotiff_path = [master_path 'geotiff'];
+  case '25000'
+    SRS_find_flag = 1; % Means that we'll need to pull the SRS info from a separate lookup table.
+    s_srs = ''; %
+    t_srs = {''}; % 
+    geotiff_path = [master_path 'geotiff'];
+  otherwise
+    disp(['The variable ''series_label'' needs to be set to ''63360'' or ''25000''. Exiting.']);
+    break
+end
+    t_srs_tag = t_srs;
+
+%% Make the output folders (if necessary):
+for k = 1:1:length(t_srs)
+  if exist([geotiff_path t_srs{k}])~=7
+    if ispc==1; [status,cmdout] = dos(['mkdir "' geotiff_path t_srs{k} '"']); else [status,cmdout] = unix(['mkdir "' geotiff_path t_srs{k} '"']);end
+      if status==0
+      disp(['Created directory: ' geotiff_path t_srs{k}]);
+      end
+  end
+end
+
+%% If SRS_find_flag==1, we need to load a lookup table to connect the sheet to the proper coordinate reference system. Need to load it as a cell
+% column 1 is the file name (no extension); column 2 is the EPSG number (number only, e.g. 26717)
+if SRS_find_flag==1
+fid_srs = fopen([master_path 'EPSG_Lookup_1_' series_label '.csv']);
+tmp = textscan(fid_srs,'%s %s %s','Delimiter',',');
+epsg_lookup(:,1) = tmp{1,1}(:,1);
+epsg_lookup(:,2) = tmp{1,2}(:,1);
+epsg_lookup(:,3) = tmp{1,3}(:,1);
+fclose(fid_srs);
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% get the directory listing in /tif; pare down to a list of only tif files:
+cd(tif_path);
+d = struct; 
+
+if dir_flag==1
+tmp_dir = dir(tif_path);
+else
+% load the processing list:
+fid_list = fopen([master_path georef_list]);
+tmp_dir = struct;
+tmp = textscan(fid_list, '%s','Delimiter',',');
+  for i = 1:1:size(tmp{1,1},1)
+  tmp_dir(i).name = tmp{1,1}{i,1};
+  tmp_dir(i).isdir = 0;
+  end
+end
+fclose(fid_list);
+
+ctr = 1;
+for i = 1:1:length(tmp_dir)
+    [fdir, fname, fext] = fileparts(tmp_dir(i).name); %file directory | filename | file extension
+    if tmp_dir(i).isdir==0 && strcmp(fext,'.tif')==1 % If we're dealing with a tif file:
+        d(ctr).name =  tmp_dir(i).name;
+        ctr = ctr+1;
+    else
+    end
+end
+clear tmp_dir;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Load the variable 'h.mat' if it exists -- it contains the height
+%%% information that we'll need (if 'identify' command isn't working):
+% Column 1 of h is the .tif name; column 2 is the image height (in pixels)
+if h_loadflag==1 && exist([master_path 'h.mat'],'file')==2
+    load([master_path 'h.mat']);
+    h_all = h;
+else
+    h_all = {};
+    h_loadflag=0;
+end
+clear h;
+
+logfile = cell(length(d),2);
+%% Cycle through the tif files:
+for i = 1:1:length(d)
+    % get the filename of the tif file:
+    filename_in = d(i).name;
+    [fdir, fname, fext] = fileparts(filename_in); %file directory | filename | file extension
+    logfile{i,1} = filename_in;
+    % look for the corresponding GCP file in the gcp directory (named the same but with .txt extension)
+    if exist([gcp_path fname '.txt'],'file')==2
+    disp(['Now working on file: ' filename_in]);
+        
+        %%%% Get image size (using imagemagick 'identify' command or from loaded 'h.mat' variable):
+        if h_loadflag==1
+            try
+                h = h_all{strcmp(filename_in,h_all(:,1))==1,2};
+            catch
+                disp(['Could not find entry for ' filename_in ' in h_all.']);
+                h = 0;
+            end
+        else
+            cmd = ['identify -quiet -format "%h" ' filename_in];
+            cmd2 = ['identify -quiet -format "%y" ' filename_in];
+            %%% Note to self, need to add a query for resolution identify -quiet -format "%y"
+            if ispc==1; [status,cmdout] = dos(cmd); else [status,cmdout] = unix(cmd);end
+            h = str2double(cmdout); %height of the tif in pixels
+            if ispc==1; [status2,cmdout2] = dos(cmd2); else [status2,cmdout2] = unix(cmd2);end
+            ppi_in = str2double(cmdout2); %resolution of the tif (in points per inch)
+            ppi_out = ppi_in./2;
+        end
+        
+        if isempty(h)==1 || h==0
+            disp(['Could not get the image height for: ' filename_in '. Skipping.']);
+            logfile{i,2} = 'height';
+            continue
+        end
+        
+        %%%% if SRS_find_flag==1, retrieve the proper input (and output) reference systems
+        if SRS_find_flag==1
+          try
+          
+            s_srs = epsg_lookup{strcmp(fname,epsg_lookup(:,1))==1,2};
+            t_srs{1,1} = epsg_lookup{strcmp(fname,epsg_lookup(:,1))==1,3};
+            t_srs_tag = {''};
+          catch
+          disp(['Could not find entry for ' fname ' in epsg_lookup.']);
+          end
+        else
+        end
+        
+        if isempty(s_srs)==1
+            disp(['Could not get info from epsg_lookup for: ' fname '. Skipping.']);
+            logfile{i,2} = 'epsg_lookup';
+            continue
+        end
+        
+%        if exist([gcp_path fname '.txt'],'file')~=2
+%            disp(['Could not find the gcp file for ' fname '. Skipping.']);
+%            logfile{i,2} = 'gcp_file';
+%            continue
+%        end
+        
+        % Read the GCP file:
+        fid = fopen([gcp_path fname '.txt'],'r');
+        C_tmp = textscan(fid,gcp_fmt,'delimiter','\t');
+        C = cell2mat(C_tmp); %convert from cell array into a matrix
+        fclose(fid)
+        
+        %%% Put something in here that will take a look at the number of points in the GCP file, and decide which transformation to use:
+        if size(C,1)>6; trans_order = '2'; else trans_order = '1'; end
+        
+        % format of C:
+        % x (inches right) | y (inches up) | x_map (long) | y_map (lat)
+        x = C(:,1);
+        y = C(:,2);
+        long = C(:,3);
+        lat = C(:,4);
+        
+        %Create the qgis .points file:
+        fid_qgis = fopen([qgis_gcp_path filename_in '.points'],'w');
+        fprintf(fid_qgis,'%s\n','mapX,mapY,pixelX,pixelY,enable');
+        fclose(fid_qgis);
+        
+        %%% Create format for qgis file:
+        C_QGIS = [long lat x.*ppi_in (y.*ppi_in)-h ones(length(x),1)];
+        dlmwrite([qgis_gcp_path filename_in '.points'],C_QGIS,"-append");
+        
+        %%% Generate gdal_translate string
+        % ratio of ppi_out to ppi_in
+        out_ratio = ppi_out./ppi_in;
+        out_pct = round(out_ratio*10000)./100;
+        disp(['out_ratio is: ' num2str(out_ratio) '. out_pct = ' num2str(out_pct)]);
+%        C_GDAL = [x*ppi_out (h./2)-(y*ppi_out) long lat];
+        C_GDAL = [x*ppi_out (h.*out_ratio)-(y*ppi_out) long lat];
+        gdal_str = '';
+        for j = 1:1:size(C_GDAL,1)
+            gdal_str = [gdal_str '-gcp ' num2str(C_GDAL(j,1),8) ' ' num2str(C_GDAL(j,2),8) ' ' num2str(C_GDAL(j,3),8) ' ' num2str(C_GDAL(j,4),8) ' '];
+        end
+        %last line:
+        %gdal_str = [gdal_str '-gcp ' num2str(C_GDAL(j,1)) ' ' num2str(C_GDAL(j,2)) ' ' num2str(C_GDAL(j,3)) ' ' num2str(C_GDAL(j,4))];
+        
+        %%% Try and execute GDAL translate command:
+        gdal_trans_cmd = ['gdal_translate -q -of GTiff -outsize ' num2str(out_pct) '% ' num2str(out_pct) '% ' gdal_str '"' tif_path filename_in '" "' master_path 'tmp.tif"'];
+        disp(gdal_trans_cmd);
+        disp(['Running gdal_translate on ' filename_in '.']);
+        if ispc==1; 
+        gdal_trans_cmd = ['C:\OSGeo4W64\bin\' gdal_trans_cmd];
+        [status_trans] = dos(gdal_trans_cmd); 
+        else [status_trans] = unix(gdal_trans_cmd);
+        end
+        
+        if status_trans~=0
+            disp(['gdal_translate failed for: ' filename_in '. Skipping.']);
+            logfile{i,2} = 'gdal_translate';
+            continue
+        end
+        
+        %%% Try the gdalwarp command:
+        for k = 1:1:length(t_srs)
+          gdalwarp_cmd = ['gdalwarp -overwrite -q -r cubicspline -s_srs EPSG:' s_srs ' -t_srs EPSG:' t_srs{k} ' -order ' trans_order ' -co COMPRESS=NONE -dstalpha "' master_path 'tmp.tif" "'...
+              geotiff_path t_srs_tag{k} '/' filename_in '"'];
+          disp(['Running gdalwarp on ' filename_in '.']);
+          
+          if ispc==1; 
+          gdalwarp_cmd = ['C:\OSGeo4W64\bin\' gdalwarp_cmd];
+          [status_warp, msg_warp] = dos(gdalwarp_cmd); 
+          else [status_warp] = unix(gdalwarp_cmd);
+          end
+          
+          if status_warp~=0
+              disp(['gdalwarp failed for: ' filename_in '. Skipping.']);
+              logfile{i,2} = 'gdalwarp';
+              continue
+          end
+          disp(['Transformation of ' filename_in ' was successful.']);
+        end
+        logfile{i,2} = 'clear!';
+        
+    else
+        disp(['Could not find the gcp file for: ' filename_in '. Breaking loop.']);
+        logfile{i,2} = 'no_gcp';
+        continue
+    end
+    
+end
+
+%%% Save the log file: 
+fid = fopen([master_path 'logfile_' datestr(now,30) '.txt'],'w+');
+for i = 1:1:size(logfile,1)
+fprintf(fid,'%s\t %s\n',logfile{i,:});
+end
+fclose(fid)
