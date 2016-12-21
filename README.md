@@ -12,6 +12,7 @@ The included functions/scripts:
 
 ##Dependencies: 
 The functions require installation on one/all of the following libraries:
+* Octave or matlab
 * Python version 2.7+
 * gdal version 2+
 * imagemagick version 7+ 
