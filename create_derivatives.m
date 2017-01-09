@@ -1,4 +1,4 @@
-function [logfile] = create_derivatives(series_label, process_list)
+function [logfile] = create_derivatives(series_label, process_list, pc_path_flag)
 
 % create_derivatives.m
 % This function runs through a collection of maps sheets (whether 1:25000 or 1:63360, as specified by series_label),
@@ -12,23 +12,42 @@ function [logfile] = create_derivatives(series_label, process_list)
 % georef_list: file name of a single column list of filenames for sheets to be processed (optional); file must exist in the master_path directory 
 % (i.e. /AutoGeoref/1_25000/ or /AutoGeoref/1_63360/ 
 % where process_list is not provided, the function works through the entire /tif directory
-
+% pc_path_flag: Flag allowing Jay to specify different read/write directories on the processing PC
+%%% pc_path_flag = 0 is default --> work from the 'E:\Users\brodeujj\GIS\OCUL Topo Project\AutoGeoRef directory
+%%% pc_path_flag = 1 --> work from the 'I:\AutoGeoRef directory
 
 if nargin == 0
     disp(['The variable ''series_label'' needs to be set to ''63360'' or ''25000''. Exiting.']);
     break
 elseif nargin == 1
     dir_flag = 1 % if only one argument (series label) is provided, then run through the entire /tif directory
-else
+    pc_path_flag = 0; % work from the default directory 
+elseif nargin == 2
     dir_flag = 0; % if a list is provided, the function will run through all filenames provided in the list.
+    pc_path_flag = 0; % work from the default directory 
+else
+    dir_flag = 0;
 end
 
+%%% If process_list has been provided as an empty matrix ('[]'), then change dir_flag to 1
+if isempty(process_list)==1
+  dir_flag = 1;
+else 
+  dir_flag = 0; 
+end
+
+%%% If pc_path_flag is 1, then set the home directory to I:\AutoGeoRef. Otherwise, use the default.
+if pc_path_flag==1
+home_dir = 'I:\AutoGeoRef';
+else
+home_dir = 'E:\Users\brodeujj\GIS\OCUL Topo Project\AutoGeoRef';
+end    
 %% Variables
 
 %% Paths
 %master_path = '/media/brodeujj/KINGSTON/AutoGeorefTests/';
 if ispc==1
-master_path = ['E:\Users\brodeujj\GIS\OCUL Topo Project\AutoGeoRef\1_' series_label '\'];
+master_path = [home_dir '\1_' series_label '\'];
 else
 master_path = ['/media/Stuff/AutoGeoRef/1_' series_label '/'];
 end
