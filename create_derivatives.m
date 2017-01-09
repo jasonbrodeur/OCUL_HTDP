@@ -11,7 +11,7 @@ function [logfile] = create_derivatives(series_label, process_list)
 % series_label: string input for series scale -- either '25000' or '63360'
 % georef_list: file name of a single column list of filenames for sheets to be processed (optional); file must exist in the master_path directory 
 % (i.e. /AutoGeoref/1_25000/ or /AutoGeoref/1_63360/ 
-% where process_list is not provided, the function works through the entire 
+% where process_list is not provided, the function works through the entire /tif directory
 
 
 if nargin == 0
