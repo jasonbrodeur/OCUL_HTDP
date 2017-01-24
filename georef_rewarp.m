@@ -97,8 +97,8 @@ tmp = textscan(fid_list, '%s','Delimiter',',');
   tmp_dir(i).name = tmp{1,1}{i,1};
   tmp_dir(i).isdir = 0;
   end
+  fclose(fid_list);
 end
-fclose(fid_list);
 
 ctr = 1;
 for i = 1:1:length(tmp_dir)
