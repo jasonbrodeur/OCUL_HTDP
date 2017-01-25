@@ -4,14 +4,17 @@ close all;
 %% Variables
 %h_loadflag = 0; % flag to load image heights from variable 'h.mat'. When set to 1 it loads variables; otherwise, the script will use the imagemagick 'identify' command to get the height
 %series = '63360'; %'25000' %Change this value to change the series.
-%series = '63360';
-series = '25000';
+series = '63360';
+%series = '25000';
 
+OSGeo_install_path = 'C:\Program Files\QGIS 2.18\bin\'; %The location of the gdal libraries 
 %% Paths
 %master_path = '/media/brodeujj/KINGSTON/AutoGeorefTests/';
 if ispc==1
-master_path = ['E:\Users\brodeujj\GIS\OCUL Topo Project\AutoGeoRef\1_' series '\'];
-zipflag = 0;
+%master_path = ['E:\Users\brodeujj\GIS\OCUL Topo Project\AutoGeoRef\1_' series '\'];
+tmp = pwd;
+master_path = [tmp '\1_' series '\'];
+zipflag = 1;
 else
 master_path = ['/media/Stuff/AutoGeoRef/1_' series '/'];
 zipflag = 1;
@@ -115,11 +118,11 @@ for i = 1:1:length(d)
    
    
     %run the gdal2tiles command:
-    cmd = ['gdal2tiles.py -s EPSG:' s_srs ' -z 6-16 ' geotiff_path filename_in ' "' tiles_path fname '"'];
+    cmd = [' -s EPSG:' s_srs ' -z 6-16 ' geotiff_path filename_in ' "' tiles_path fname '"'];
     if ispc==1; 
-        cmd = ['C:\OSGeo4W64\bin\' cmd];
+        cmd = ['"' OSGeo_install_path 'gdal2tiles.py"' cmd];
         [status] = dos(cmd); 
-        else [status] = unix(cmd);
+        else [status] = unix(['gdal2tiles.py' cmd]);
     end
 %    if ispc==1; [status,cmdout] = dos(cmd); else [status,cmdout] = unix(cmd);end
     
