@@ -7,7 +7,7 @@ close all;
 series = '63360';
 %series = '25000';
 
-OSGeo_install_path = 'C:\Program Files\QGIS 2.18\bin\'; %The location of the gdal libraries 
+OSGeo_install_path = 'C:\OSGeo4W64\bin\'; %The location of the gdal libraries 
 %% Paths
 %master_path = '/media/brodeujj/KINGSTON/AutoGeorefTests/';
 if ispc==1

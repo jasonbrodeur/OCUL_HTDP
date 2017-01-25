@@ -14,5 +14,5 @@ The included functions/scripts:
 The functions require installation on one/all of the following libraries:
 * Octave or matlab
 * Python version 2.7+
-* gdal version 2+
+* gdal version 2+ (on windows, this may need to be installed on top of QGIS -- e.g. GDAL can be installed from the QGIS install directory, such as: "C:\Program Files\QGIS 2.18\bin\osgeo4w-setup.exe")
 * imagemagick version 7+ 
