@@ -8,7 +8,6 @@ function [logfile] = georef_rewarp(series_label, georef_list)
 % (i.e. /AutoGeoref/1_25000/ or /AutoGeoref/1_63360/ 
 % where georef_list is not provided, the function works through the entire 
 
-
 if nargin == 0
     disp(['The variable ''series_label'' needs to be set to ''63360'' or ''25000''. Exiting.']);
     break
@@ -31,9 +30,11 @@ gcp_fmt = '%f %f %f %f'; %input format for the Arc GCP files
 %% Paths
 %master_path = '/media/brodeujj/KINGSTON/AutoGeorefTests/';
 if ispc==1
-master_path = ['E:\Users\brodeujj\GIS\OCUL Topo Project\AutoGeoRef\1_' series_label '\'];
+top_path = ['E:\Users\brodeujj\GIS\OCUL Topo Project\AutoGeoRef\'];
+master_path = [top_path '1_' series_label '\'];
 else
-master_path = ['/media/Stuff/AutoGeoRef/1_' series_label '/'];
+top_path = ['/media/Stuff/AutoGeoRef/'];
+master_path = [top_path '1_' series_label '/'];
 end
 
 gcp_path = [master_path 'GCP-Upload/'];
@@ -44,13 +45,13 @@ tiles_path = [master_path 'tiles/'];
 %% Series-specific settings:
 switch series_label
   case '63360'
-  SRS_find_flag = 1;
+%  SRS_find_flag = 1;
     s_srs = ''; %This may have to be incorporated into a loop:
 %    t_srs = {'3857';'3162'};%'EPSG:3162';% can be a cell array (gdalwarp loops through these)
     t_srs = {''}; % 
     geotiff_path = [master_path 'geotiff'];
   case '25000'
-    SRS_find_flag = 1; % Means that we'll need to pull the SRS info from a separate lookup table.
+%    SRS_find_flag = 1; % Means that we'll need to pull the SRS info from a separate lookup table.
     s_srs = ''; %
     t_srs = {''}; % 
     geotiff_path = [master_path 'geotiff'];
@@ -72,14 +73,15 @@ end
 
 %% If SRS_find_flag==1, we need to load a lookup table to connect the sheet to the proper coordinate reference system. Need to load it as a cell
 % column 1 is the file name (no extension); column 2 is the EPSG number (number only, e.g. 26717)
-if SRS_find_flag==1
-fid_srs = fopen([master_path 'EPSG_Lookup_1_' series_label '.csv']);
-tmp = textscan(fid_srs,'%s %s %s','Delimiter',',');
+% edit 20170127: using EPSG_Lookup.csv for all purposes now. No need for SRS_find_flag anymore (assumed to always be =1)
+%if SRS_find_flag==1
+fid_srs = fopen([top_path 'EPSG_Lookup.csv'],'r');
+tmp = textscan(fid_srs,'%s %s %s','Delimiter',',','headerlines',1);
 epsg_lookup(:,1) = tmp{1,1}(:,1);
 epsg_lookup(:,2) = tmp{1,2}(:,1);
 epsg_lookup(:,3) = tmp{1,3}(:,1);
 fclose(fid_srs);
-end
+%end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% get the directory listing in /tif; pare down to a list of only tif files:
@@ -161,20 +163,19 @@ for i = 1:1:length(d)
         end
         
         %%%% if SRS_find_flag==1, retrieve the proper input (and output) reference systems
-        if SRS_find_flag==1
+%        if SRS_find_flag==1
           try
-          
-            s_srs = epsg_lookup{strcmp(fname,epsg_lookup(:,1))==1,2};
-            t_srs{1,1} = epsg_lookup{strcmp(fname,epsg_lookup(:,1))==1,3};
+            s_srs = epsg_lookup{strcmp(fname(1:4),epsg_lookup(:,1))==1,2};
+            t_srs{1,1} = epsg_lookup{strcmp(fname(1:4),epsg_lookup(:,1))==1,3};
             t_srs_tag = {''};
           catch
-          disp(['Could not find entry for ' fname ' in epsg_lookup.']);
+          disp(['Could not find entry for ' fname(1:4) ' in epsg_lookup.']);
           end
-        else
-        end
+%        else
+%        end
         
         if isempty(s_srs)==1
-            disp(['Could not get info from epsg_lookup for: ' fname '. Skipping.']);
+            disp(['Could not get info from epsg_lookup for: ' fname(1:4) '. Skipping.']);
             logfile{i,2} = 'epsg_lookup';
             continue
         end
