@@ -75,7 +75,7 @@ end
 % column 1 is the file name (no extension); column 2 is the EPSG number (number only, e.g. 26717)
 % edit 20170127: using EPSG_Lookup.csv for all purposes now. No need for SRS_find_flag anymore (assumed to always be =1)
 %if SRS_find_flag==1
-fid_srs = fopen([top_path 'EPSG_Lookup.csv'],'r');
+fid_srs = fopen([top_path 'EPSG_Lookup_1_' series_label '.csv'],'r');
 tmp = textscan(fid_srs,'%s %s %s','Delimiter',',','headerlines',1);
 epsg_lookup(:,1) = tmp{1,1}(:,1);
 epsg_lookup(:,2) = tmp{1,2}(:,1);
