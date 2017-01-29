@@ -4,19 +4,21 @@ close all;
 %% Variables
 %h_loadflag = 0; % flag to load image heights from variable 'h.mat'. When set to 1 it loads variables; otherwise, the script will use the imagemagick 'identify' command to get the height
 %series = '63360'; %'25000' %Change this value to change the series.
-series = '63360';
-%series = '25000';
+series_label = '63360';
+%series_label = '25000';
 
 OSGeo_install_path = 'C:\OSGeo4W64\bin\'; %The location of the gdal libraries 
 %% Paths
 %master_path = '/media/brodeujj/KINGSTON/AutoGeorefTests/';
 if ispc==1
-%master_path = ['E:\Users\brodeujj\GIS\OCUL Topo Project\AutoGeoRef\1_' series '\'];
-tmp = pwd;
-master_path = [tmp '\1_' series '\'];
+%master_path = ['E:\Users\brodeujj\GIS\OCUL Topo Project\AutoGeoRef\1_' series_label '\'];
+top_path = pwd;
+master_path = [top_path '\1_' series_label '\'];
+
 zipflag = 1;
 else
-master_path = ['/media/Stuff/AutoGeoRef/1_' series '/'];
+top_path = ['/media/Stuff/AutoGeoRef/'];
+master_path = [top_path '1_' series_label '/'];
 zipflag = 1;
 end
 
@@ -26,7 +28,7 @@ end
 tiles_path = [master_path 'tiles/'];
 geotiff_path = [master_path 'geotiff/'];
 t_srs='3857';
-SRS_find_flag = 1;
+%SRS_find_flag = 1;
 %% Series-specific settings:
 %switch series
 %  case '63360'
@@ -50,14 +52,20 @@ t_srs_tag = t_srs;
 
 %% If SRS_find_flag==1, we need to load a lookup table to connect the sheet to the proper coordinate reference system. Need to load it as a cell
 % column 1 is the file name (no extension); column 2 is the EPSG number (number only, e.g. 26717)
-if SRS_find_flag==1
-fid_srs = fopen([master_path 'EPSG_Lookup_1_' series '.csv']);
-tmp = textscan(fid_srs,'%s %s %s','Delimiter',',');
+%if SRS_find_flag==1
+%fid_srs = fopen([master_path 'EPSG_Lookup_1_' series_label '.csv']);
+%tmp = textscan(fid_srs,'%s %s %s','Delimiter',',');
+%epsg_lookup(:,1) = tmp{1,1}(:,1);
+%epsg_lookup(:,2) = tmp{1,2}(:,1);
+%epsg_lookup(:,3) = tmp{1,3}(:,1);
+%fclose(fid_srs);
+%end
+fid_srs = fopen([top_path 'EPSG_Lookup_1_' series_label '.csv'],'r');
+tmp = textscan(fid_srs,'%s %s %s','Delimiter',',','headerlines',1);
 epsg_lookup(:,1) = tmp{1,1}(:,1);
 epsg_lookup(:,2) = tmp{1,2}(:,1);
 epsg_lookup(:,3) = tmp{1,3}(:,1);
 fclose(fid_srs);
-end
 
 %%% get the directory listing in /geotif; pare down to a list of only tif files:
 cd(geotiff_path);
@@ -85,6 +93,7 @@ clear tmp_dir;
 %    h_loadflag=0;
 %end
 %clear h;
+
 cd(tiles_path);
 logfile = cell(length(d),2);
 %% Cycle through the tif files:
@@ -100,14 +109,13 @@ for i = 1:1:length(d)
    mkdir([tiles_path fname]);
    end
    
-   %%%% if SRS_find_flag==1, retrieve the proper input (and output) reference systems
-        if SRS_find_flag==1
-          try
-            s_srs = epsg_lookup{strcmp(fname,epsg_lookup(:,1))==1,3};
-          catch
-          disp(['Could not find entry for ' fname ' in epsg_lookup.']);
-          end
-        else
+   %%%% retrieve the proper input (and output) reference systems
+        try
+            s_srs = epsg_lookup{strcmp(fname(1:4),epsg_lookup(:,1))==1,3};
+%            t_srs{1,1} = epsg_lookup{strcmp(fname(1:4),epsg_lookup(:,1))==1,3};
+%            t_srs_tag = {''};
+        catch
+          disp(['Could not find entry for ' fname(1:4) ' in epsg_lookup.']);
         end
         
         if isempty(s_srs)==1
@@ -115,7 +123,6 @@ for i = 1:1:length(d)
             logfile{i,2} = 'epsg_lookup';
             continue
         end
-   
    
     %run the gdal2tiles command:
     cmd = [' -s EPSG:' s_srs ' -z 6-16 ' geotiff_path filename_in ' "' tiles_path fname '"'];
