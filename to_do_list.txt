@@ -2,5 +2,5 @@ To do:
 - upload QGIS GCPs for the items georeferenced (done)
 - upload geotifs to FTP (done)
 - move geotifs to hard drive (done)
---> run tile creator on home computer
--->upload tiles to FTP
+--> run tile creator on home computer (done)
+-->upload tiles to FTP (done)
