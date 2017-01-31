@@ -22,6 +22,7 @@ if nargin == 0
 elseif nargin == 1
     dir_flag = 1 % if only one argument (series label) is provided, then run through the entire /tif directory
     pc_path_flag = 0; % work from the default directory 
+    process_list = '';
 elseif nargin == 2
     dir_flag = 0; % if a list is provided, the function will run through all filenames provided in the list.
     pc_path_flag = 0; % work from the default directory 
