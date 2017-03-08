@@ -1,10 +1,32 @@
+function [logfle] = create_webtiles(series_label, process_list, zipflag)
+%%% INPUTS
+% series_label: string input for series scale -- either '25000' or '63360'
+% process_list: file name of a single column list of filenames for sheets to be processed (optional); file must exist in the master_path directory 
+% (i.e. /AutoGeoref/1_25000/ or /AutoGeoref/1_63360/. When georef_list is not provided, the function works through the entire directory.
+% zipflag: flag for zipping top-level folders when created for each sheet (1 = zip; 0 = do not zip);
+
+if nargin == 0
+    disp(['The variable ''series_label'' needs to be set to ''63360'' or ''25000''. Exiting.']);
+    break
+elseif nargin == 1
+    dir_flag = 1 % if only one argument (series label) is provided, then run through the entire /tif directory
+    zipflag = 0; % zip the tile folders by default
+    process_list = '';
+elseif nargin == 2
+    dir_flag = 0; % if a list is provided, the function will run through all filenames provided in the list.
+    zipflag = 1; % zip the tile folders by default
+else
+    dir_flag = 0;
+end
+
+
 clear all;
 close all;
 
 %% Variables
 %h_loadflag = 0; % flag to load image heights from variable 'h.mat'. When set to 1 it loads variables; otherwise, the script will use the imagemagick 'identify' command to get the height
 %series = '63360'; %'25000' %Change this value to change the series.
-series_label = '63360';
+%series_label = '63360';
 %series_label = '25000';
 
 OSGeo_install_path = 'C:\OSGeo4W64\bin\'; %The location of the gdal libraries 
@@ -14,12 +36,11 @@ if ispc==1
 %master_path = ['E:\Users\brodeujj\GIS\OCUL Topo Project\AutoGeoRef\1_' series_label '\'];
 top_path = pwd;
 master_path = [top_path '\1_' series_label '\'];
-
-zipflag = 1;
+%zipflag = 1;
 else
 top_path = ['/media/Stuff/AutoGeoRef/'];
 master_path = [top_path '1_' series_label '/'];
-zipflag = 1;
+%zipflag = 1;
 end
 
 %gcp_path = [master_path 'GCP-Upload/'];
@@ -69,8 +90,23 @@ fclose(fid_srs);
 
 %%% get the directory listing in /geotif; pare down to a list of only tif files:
 cd(geotiff_path);
-tmp_dir = dir(geotiff_path);
+
 d = struct;
+
+if dir_flag==1
+tmp_dir = dir(geotiff_path);
+else
+% load the processing list:
+fid_list = fopen([master_path process_list]);
+tmp_dir = struct;
+tmp = textscan(fid_list, '%s','Delimiter',',');
+  for i = 1:1:size(tmp{1,1},1)
+  tmp_dir(i).name = tmp{1,1}{i,1};
+  tmp_dir(i).isdir = 0;
+  end
+  fclose(fid_list);
+end
+
 ctr = 1;
 for i = 3:1:length(tmp_dir)
     [fdir, fname, fext] = fileparts(tmp_dir(i).name); %file directory | filename | file extension
@@ -81,18 +117,6 @@ for i = 3:1:length(tmp_dir)
     end
 end
 clear tmp_dir;
-
-%%% Load the variable 'h.mat' if it exists -- it contains the height
-%%% information that we'll need (if 'identify' command isn't working):
-% Column 1 of h is the .tif name; column 2 is the image height (in pixels)
-%if h_loadflag==1 && exist([master_path 'h.mat'],'file')==2
-%    load([master_path 'h.mat']);
-%    h_all = h;
-%else
-%    h_all = {};
-%    h_loadflag=0;
-%end
-%clear h;
 
 cd(tiles_path);
 logfile = cell(length(d),2);
@@ -154,6 +178,13 @@ for i = 1:1:length(d)
          logfile{i,2} = 'ok';  
        
 end
+
+%%% Save the log file: 
+fid = fopen([master_path 'tiles_logfile_' datestr(now,30) '.txt'],'w+');
+for i = 1:1:size(logfile,1)
+fprintf(fid,'%s\t %s\n',logfile{i,:});
+end
+fclose(fid)
 
 %% If in Linux (and we'll need to transport these back on a hard drive), zip these folders up
 %if zipflag==1
