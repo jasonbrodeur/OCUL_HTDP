@@ -19,68 +19,27 @@ else
     dir_flag = 0;
 end
 
-
-clear all;
-close all;
-
-%% Variables
-%h_loadflag = 0; % flag to load image heights from variable 'h.mat'. When set to 1 it loads variables; otherwise, the script will use the imagemagick 'identify' command to get the height
-%series = '63360'; %'25000' %Change this value to change the series.
-%series_label = '63360';
-%series_label = '25000';
-
-OSGeo_install_path = 'C:\OSGeo4W64\bin\'; %The location of the gdal libraries 
 %% Paths
 %master_path = '/media/brodeujj/KINGSTON/AutoGeorefTests/';
 if ispc==1
-%master_path = ['E:\Users\brodeujj\GIS\OCUL Topo Project\AutoGeoRef\1_' series_label '\'];
+OSGeo_install_path = 'C:\OSGeo4W64\bin\'; %The location of the gdal libraries 
 top_path = pwd;
 master_path = [top_path '\1_' series_label '\'];
-%zipflag = 1;
 else
 top_path = ['/media/Stuff/AutoGeoRef/'];
 master_path = [top_path '1_' series_label '/'];
-%zipflag = 1;
 end
 
-%gcp_path = [master_path 'GCP-Upload/'];
-%geotif_path = [master_path 'tif/'];
-%qgis_gcp_path = [master_path 'GCP-QGIS\'];
 tiles_path = [master_path 'tiles/'];
 geotiff_path = [master_path 'geotiff/'];
 t_srs='3857';
-%SRS_find_flag = 1;
-%% Series-specific settings:
-%switch series
-%  case '63360'
-%  SRS_find_flag = 1;
-%    s_srs = ''; %This may have to be incorporated into a loop:
-%%    t_srs = {'3857';'3162'};%'EPSG:3162';% can be a cell array (gdalwarp loops through these)
-%    t_srs = {''}; % 
-%    geotiff_path = [master_path 'geotiff'];
-%  case '25000'
-%    SRS_find_flag = 1; % Means that we'll need to pull the SRS info from a separate lookup table.
-%    s_srs = ''; %
-%    t_srs = {''}; % 
-%    geotiff_path = [master_path 'geotiff'];
-%  otherwise
-%    disp(['The variable ''series'' needs to be set to ''63360'' or ''25000''. Exiting.']);
-%    break
-%end
 t_srs_tag = t_srs;
 
 %% Make the output folders (if necessary):
 
-%% If SRS_find_flag==1, we need to load a lookup table to connect the sheet to the proper coordinate reference system. Need to load it as a cell
+%% We need to load a lookup table to connect the sheet to the proper coordinate reference system. Need to load it as a cell
 % column 1 is the file name (no extension); column 2 is the EPSG number (number only, e.g. 26717)
-%if SRS_find_flag==1
-%fid_srs = fopen([master_path 'EPSG_Lookup_1_' series_label '.csv']);
-%tmp = textscan(fid_srs,'%s %s %s','Delimiter',',');
-%epsg_lookup(:,1) = tmp{1,1}(:,1);
-%epsg_lookup(:,2) = tmp{1,2}(:,1);
-%epsg_lookup(:,3) = tmp{1,3}(:,1);
-%fclose(fid_srs);
-%end
+
 fid_srs = fopen([top_path 'EPSG_Lookup_1_' series_label '.csv'],'r');
 tmp = textscan(fid_srs,'%s %s %s','Delimiter',',','headerlines',1);
 epsg_lookup(:,1) = tmp{1,1}(:,1);
@@ -88,9 +47,8 @@ epsg_lookup(:,2) = tmp{1,2}(:,1);
 epsg_lookup(:,3) = tmp{1,3}(:,1);
 fclose(fid_srs);
 
-%%% get the directory listing in /geotif; pare down to a list of only tif files:
+%%% If dir_flag = 1, get the directory listing in /geotif; otherwise, load the processing list.
 cd(geotiff_path);
-
 d = struct;
 
 if dir_flag==1
@@ -107,6 +65,7 @@ tmp = textscan(fid_list, '%s','Delimiter',',');
   fclose(fid_list);
 end
 
+%%% pare down to a list of only tif files:
 ctr = 1;
 for i = 3:1:length(tmp_dir)
     [fdir, fname, fext] = fileparts(tmp_dir(i).name); %file directory | filename | file extension
@@ -118,6 +77,7 @@ for i = 3:1:length(tmp_dir)
 end
 clear tmp_dir;
 
+%%% Time to run the tile generation
 cd(tiles_path);
 logfile = cell(length(d),2);
 %% Cycle through the tif files:
