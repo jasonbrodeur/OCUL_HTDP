@@ -257,10 +257,11 @@ for i = 1:1:length(d)
               disp(['gdalwarp failed for: ' filename_in '. Skipping.']);
               logfile{i,2} = 'gdalwarp';
               continue
+          
           end
           disp(['Transformation of ' filename_in ' was successful.']);
+          logfile{i,2} = 'clear!';
         end
-        logfile{i,2} = 'clear!';
         
     else
         disp(['Could not find the gcp file for: ' filename_in '. Breaking loop.']);
