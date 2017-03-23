@@ -10,7 +10,7 @@ if nargin == 0
     break
 elseif nargin == 1
     dir_flag = 1 % if only one argument (series label) is provided, then run through the entire /tif directory
-    zipflag = 0; % zip the tile folders by default
+    zipflag = 1; % zip the tile folders by default
     process_list = '';
 elseif nargin == 2
     dir_flag = 0; % if a list is provided, the function will run through all filenames provided in the list.
@@ -24,9 +24,15 @@ end
 if ispc==1
 OSGeo_install_path = 'C:\OSGeo4W64\bin\'; %The location of the gdal libraries 
 top_path = pwd;
+%top_path = 'I:\AutoGeoRef\';
 master_path = [top_path '\1_' series_label '\'];
 else
+if exist('/media/Stuff/AutoGeoRef/')==7
 top_path = ['/media/Stuff/AutoGeoRef/'];
+else
+top_path = ['/home/brodeujj/D_Drive/Local/AutoGeoRef/'];
+end
+
 master_path = [top_path '1_' series_label '/'];
 end
 
@@ -80,6 +86,7 @@ clear tmp_dir;
 %%% Time to run the tile generation
 cd(tiles_path);
 logfile = cell(length(d),2);
+cmd_list = cell();
 %% Cycle through the tif files:
 for i = 1:1:length(d)
     % get the filename of the tif file:
@@ -110,6 +117,7 @@ for i = 1:1:length(d)
    
     %run the gdal2tiles command:
     cmd = [' -s EPSG:' s_srs ' -z 6-16 ' geotiff_path filename_in ' "' tiles_path fname '"'];
+    cmd_list{i,1} = cmd;
     if ispc==1; 
         cmd = ['"' OSGeo_install_path 'gdal2tiles.py"' cmd];
         [status] = dos(cmd); 
@@ -127,14 +135,13 @@ for i = 1:1:length(d)
         [status_zip] = unix(['zip -r ' fname '.zip ' fname ' &']);  
 %        [status_zip] = unix(['pushd "' tiles_path '" && zip -r ' fname '.zip ' fname ' && popd &']); 
 %        [status_zip] = unix(['zip -r "' tiles_path fname '.zip" "' tiles_path fname '" &']); 
-    end 
-    
-    if status_zip~=0
+      if status_zip~=0
         disp(['zipping failed for: ' fname '. Skipping.']);
         logfile{i,2} = 'zip';
         continue
-        
-    end
+      end
+    end 
+    
          logfile{i,2} = 'ok';  
        
 end
@@ -145,7 +152,7 @@ for i = 1:1:size(logfile,1)
 fprintf(fid,'%s\t %s\n',logfile{i,:});
 end
 fclose(fid)
-
+disp(cmd_list);
 %% If in Linux (and we'll need to transport these back on a hard drive), zip these folders up
 %if zipflag==1
 %cd(tiles_path)
