@@ -64,7 +64,7 @@ else
 fid_list = fopen([master_path process_list]);
 tmp_dir = struct;
 tmp = textscan(fid_list, '%s','Delimiter',',');
-  for i = 1:1:size(tmp{1,1},1)
+  for i = 1:size(tmp{1,1},1)
   tmp_dir(i).name = tmp{1,1}{i,1};
   tmp_dir(i).isdir = 0;
   end
@@ -73,7 +73,7 @@ end
 
 %%% pare down to a list of only tif files:
 ctr = 1;
-for i = 3:1:length(tmp_dir)
+for i = 1:1:length(tmp_dir)
     [fdir, fname, fext] = fileparts(tmp_dir(i).name); %file directory | filename | file extension
     if tmp_dir(i).isdir==0 && strcmp(fext,'.tif')==1 % If we're dealing with a tif file:
         d(ctr).name =  tmp_dir(i).name;
