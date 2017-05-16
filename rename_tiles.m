@@ -4,7 +4,8 @@
 %%% subdirectories for each TMS set (e.g. this folder would contain directories such as /030M05_1923, /030M11_1921, etc.)
 %%% Created by JJB on 16-May, 2017. 
 
-% This function converts gdal tiles (in TMS format) to XYZ format.
+%%% More information on this conversion process found at: https://gist.github.com/tmcw/4954720
+
 clearvars;
 top_path = 'D:\Local\Scratch\gdal_tests\'; % Top-level folder where directories exist for each sheet (e.g. this folder contains /030M05_1923, /030M11_1921, etc.)
 
