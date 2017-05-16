@@ -1,3 +1,9 @@
+%%% The purpose of this script is to work sequentially through a set of directories with TMS-format tiles, and convert them
+%%% (in-place) to XYZ-format tiles.
+%%% Assumptions: You can point the script (by changing the path in the <top_path> variable) to a directory with separate
+%%% subdirectories for each TMS set (e.g. this folder would contain directories such as /030M05_1923, /030M11_1921, etc.)
+%%% Created by JJB on 16-May, 2017. 
+
 % This function converts gdal tiles (in TMS format) to XYZ format.
 clearvars;
 top_path = 'D:\Local\Scratch\gdal_tests\'; % Top-level folder where directories exist for each sheet (e.g. this folder contains /030M05_1923, /030M11_1921, etc.)
