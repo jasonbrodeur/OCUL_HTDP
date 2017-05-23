@@ -30,7 +30,12 @@ gcp_fmt = '%f %f %f %f'; %input format for the Arc GCP files
 %% Paths
 %master_path = '/media/brodeujj/KINGSTON/AutoGeorefTests/';
 if ispc==1
+if exist('E:\Users\brodeujj\GIS\OCUL Topo Project\AutoGeoRef\','folder')==7
 top_path = ['E:\Users\brodeujj\GIS\OCUL Topo Project\AutoGeoRef\'];
+else
+top_path = ['F:\OCUL_HTDP\AutoGeoRef\'];
+end
+
 master_path = [top_path '1_' series_label '\'];
 else
 top_path = ['/media/Stuff/AutoGeoRef/'];
@@ -55,6 +60,11 @@ switch series_label
     s_srs = ''; %
     t_srs = {''}; % 
     geotiff_path = [master_path 'geotiff'];
+  case '50000'
+    s_srs = ''; %
+    t_srs = {''}; % 
+    geotiff_path = [master_path 'geotiff']; 
+  
   otherwise
     disp(['The variable ''series_label'' needs to be set to ''63360'' or ''25000''. Exiting.']);
     break
