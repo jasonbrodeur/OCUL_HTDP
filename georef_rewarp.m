@@ -291,9 +291,9 @@ for i = 1:1:length(d)
         
         % Set the coordinate system for clipping (according to publication year)
         if pubyear > 1984 
-        te_srs = 4269;
+        te_srs = '4269';
         else
-        te_srs = 4267;
+        te_srs = '4267';
         end
         
         %%% Generate gdal_translate string
@@ -349,8 +349,10 @@ for i = 1:1:length(d)
           
           %%% if clipping_flag==1, run gdalwarp command again, but clip to the neatline.
           if clipping_flag==1
-          gdalwarp_cmd2 = ['gdalwarp -overwrite -q -r cubicspline -s_srs EPSG:' s_srs ' -t_srs EPSG:' t_srs{k} ' -te ' lng_min ' ' lat_min ' ' lng_max ' ' lat_max ' -te_srs EPSG:' te_srs ' -order ' trans_order ' -co COMPRESS=NONE -dstalpha "' master_path 'tmp.tif" "'...
-              geotiff_clipped_path t_srs_tag{k} '/' filename_in '"'];
+          gdalwarp_cmd2 = ['gdalwarp -overwrite -q -r cubicspline -s_srs EPSG:' s_srs ' -t_srs EPSG:4269 -te ' num2str(lng_min) ' ' num2str(lat_min) ' ' num2str(lng_max) ' ' num2str(lat_max) ' -te_srs EPSG:' te_srs ' -order ' trans_order ' -co COMPRESS=NONE -dstalpha "' master_path 'tmp.tif" "'...
+              master_path 'tmp_clip.tif"'];
+%          gdalwarp_cmd2 = ['gdalwarp -overwrite -q -r cubicspline -s_srs EPSG:' s_srs ' -t_srs EPSG:' t_srs{k} ' -te ' num2str(lng_min) ' ' num2str(lat_min) ' ' num2str(lng_max) ' ' num2str(lat_max) ' -te_srs EPSG:' te_srs ' -order ' trans_order ' -co COMPRESS=NONE -dstalpha "' master_path 'tmp.tif" "' geotiff_clipped_path t_srs_tag{k} '/' filename_in '"'];    
+          
           disp(['Running gdalwarp (clipped) on ' filename_in '.']);
           
           if ispc==1; 
