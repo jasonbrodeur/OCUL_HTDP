@@ -349,8 +349,7 @@ for i = 1:1:length(d)
           
           %%% if clipping_flag==1, run gdalwarp command again, but clip to the neatline.
           if clipping_flag==1
-          gdalwarp_cmd2 = ['gdalwarp -overwrite -q -r cubicspline -s_srs EPSG:' s_srs ' -t_srs EPSG:4269 -te ' num2str(lng_min) ' ' num2str(lat_min) ' ' num2str(lng_max) ' ' num2str(lat_max) ' -te_srs EPSG:' te_srs ' -order ' trans_order ' -co COMPRESS=NONE -dstalpha "' master_path 'tmp.tif" "'...
-              master_path 'tmp_clip.tif"'];
+          gdalwarp_cmd2 = ['gdalwarp -overwrite -q -r cubicspline -s_srs EPSG:' s_srs ' -t_srs EPSG:4269 -te ' num2str(lng_min) ' ' num2str(lat_min) ' ' num2str(lng_max) ' ' num2str(lat_max) ' -te_srs EPSG:' te_srs ' -order ' trans_order ' -co COMPRESS=NONE -dstalpha "' master_path 'tmp.tif" "' geotiff_clipped_path t_srs_tag{k} '/' filename_in '"'];
 %          gdalwarp_cmd2 = ['gdalwarp -overwrite -q -r cubicspline -s_srs EPSG:' s_srs ' -t_srs EPSG:' t_srs{k} ' -te ' num2str(lng_min) ' ' num2str(lat_min) ' ' num2str(lng_max) ' ' num2str(lat_max) ' -te_srs EPSG:' te_srs ' -order ' trans_order ' -co COMPRESS=NONE -dstalpha "' master_path 'tmp.tif" "' geotiff_clipped_path t_srs_tag{k} '/' filename_in '"'];    
           
           disp(['Running gdalwarp (clipped) on ' filename_in '.']);
