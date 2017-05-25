@@ -114,9 +114,9 @@ clear tmp;
 %%% Load in the NTS lookup table (to get extents for the sheet, to be used in clipping).
 % Sheet | East | West | South | North
 fid_nts = fopen([top_path 'NTS_TopoCorners_1_' series_label '.csv'],'r');
-tmp = textscan(fid_nts,'%s %f %f %f %f','Delimiter',',','headerlines',1);
+tmp = textscan(fid_nts,'%s %s %s %s %s','Delimiter',',','headerlines',1);
 nts_lookup(:,1) = tmp{1,1}(:,1); % sheet
-nts_lookup(:,2) = tmp{1,2}(:,1); % east
+nts_lookup(:,2) = tmp{1,2};%(:,1); % east
 nts_lookup(:,3) = tmp{1,3}(:,1); % west
 nts_lookup(:,4) = tmp{1,4}(:,1); % south
 nts_lookup(:,5) = tmp{1,5}(:,1); % north
@@ -276,10 +276,10 @@ for i = 1:1:length(d)
         
        %% Extract the extents of the map in the four cardinal directions. We need this in lat/long, so we'll need to find it in the lookup table.
        right_row = find(strcmp(sheetname,nts_lookup(:,1))==1);
-       lng_max = nts_lookup{right_row,2};
-       lng_min = nts_lookup{right_row,3};
-       lat_min = nts_lookup{right_row,4};
-       lat_max = nts_lookup{right_row,5};
+       lng_max = str2double(nts_lookup{right_row,2});
+       lng_min = str2double(nts_lookup{right_row,3});
+       lat_min = str2double(nts_lookup{right_row,4});
+       lat_max = str2double(nts_lookup{right_row,5});
        
         switch fname(end)
           case 'E'
