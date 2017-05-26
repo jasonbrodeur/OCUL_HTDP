@@ -1,4 +1,4 @@
-function [logfle] = create_webtiles(series_label, process_list, zipflag)
+function [logfle] = create_webtiles(series_label, process_list, zipflag,s_srs_override)
 %%% INPUTS
 % series_label: string input for series scale -- either '25000' or '63360'
 % process_list: file name of a single column list of filenames for sheets to be processed (optional); file must exist in the master_path directory 
@@ -12,11 +12,17 @@ elseif nargin == 1
     dir_flag = 1 % if only one argument (series label) is provided, then run through the entire /tif directory
     zipflag = 1; % zip the tile folders by default
     process_list = '';
+    s_srs_override='';
 elseif nargin == 2
     dir_flag = 0; % if a list is provided, the function will run through all filenames provided in the list.
     zipflag = 1; % zip the tile folders by default
-else
-    dir_flag = 0;
+    s_srs_override = '';
+elseif nargin == 3
+s_srs_override = '';
+end
+
+if isempty(process_list)==1
+dir_flag = 1;
 end
 
 %% Paths
@@ -99,7 +105,7 @@ for i = 1:1:length(d)
    else
    mkdir([tiles_path fname]);
    end
-   
+        if isempty(s_srs_override)==1
    %%%% retrieve the proper input (and output) reference systems
         try
             s_srs = epsg_lookup{strcmp(fname(1:4),epsg_lookup(:,1))==1,3};
@@ -107,6 +113,10 @@ for i = 1:1:length(d)
 %            t_srs_tag = {''};
         catch
           disp(['Could not find entry for ' fname(1:4) ' in epsg_lookup.']);
+          s_srs = '';
+        end
+        else
+          s_srs = s_srs_override;
         end
         
         if isempty(s_srs)==1
@@ -116,7 +126,7 @@ for i = 1:1:length(d)
         end
    
     %run the gdal2tiles command:
-    cmd = [' -s EPSG:' s_srs ' -z 6-16 ' geotiff_path filename_in ' "' tiles_path fname '"'];
+    cmd = [' -s EPSG:' s_srs ' -z 6-17 ' geotiff_path filename_in ' "' tiles_path fname '"'];
     cmd_list{i,1} = cmd;
     if ispc==1; 
         cmd = ['"' OSGeo_install_path 'gdal2tiles.py"' cmd];
