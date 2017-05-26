@@ -12,9 +12,9 @@ function [logfile] = georef_rewarp(series_label, georef_list, clipping_flag)
 
 if nargin == 0
     disp(['The variable ''series_label'' needs to be set to ''63360'' or ''25000''. Exiting.']);
-    break
+    return;
 elseif nargin == 1
-    dir_flag = 1 % if only one argument (series label) is provided, then run through the entire /tif directory
+    dir_flag = 1; % if only one argument (series label) is provided, then run through the entire /tif directory
     clipping_flag = 0;
 elseif nargin ==2
     dir_flag = 0; % if a list is provided, the function will run through all filenames provided in the list.
@@ -272,7 +272,7 @@ for i = 1:1:length(d)
         
         %%% Create format for qgis file:
         C_QGIS = [lng lat x.*ppi_in (y.*ppi_in)-h ones(length(x),1)];
-        dlmwrite([qgis_gcp_path filename_in '.points'],C_QGIS,"-append");
+        dlmwrite([qgis_gcp_path filename_in '.points'],C_QGIS,'-append');
         
        %% Extract the extents of the map in the four cardinal directions. We need this in lat/long, so we'll need to find it in the lookup table.
        right_row = find(strcmp(sheetname,nts_lookup(:,1))==1);
