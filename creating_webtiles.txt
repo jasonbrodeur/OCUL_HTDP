@@ -1,0 +1,18 @@
+Open OSGeo4W Shell
+
+> D:
+> cd \Local\AutoGeoRef\1_63360\geotiff
+
+Step 1: Build virtual raster:
+For 1910:
+> gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1907.tif 030M05_1909.tif
+For 1920:
+> gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1907.tif 030M05_1909.tif 040P01_1916.tif 040P08_1916.tif
+
+####NOT NEEDED HERE -- PROCEED TO STEP 3 #############
+%%% Step 2: Run the following gdalwarp command to ensure the nodata areas are removed for the final tile output:
+%%% > gdalwarp -of VRT -dstnodata 0 -dstnodata 255 -wo UNIFIED_SRC_NODATA=YES -overwrite -s_srs EPSG:4269 outputfile.vrt outputfile2.vrt
+#####################################################
+
+Step 3: Generate tiles:
+> gdal2tiles -s EPSG:4269 -q -r cubic -z 6-17 outputfile.vrt 1910
