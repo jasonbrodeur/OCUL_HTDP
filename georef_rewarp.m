@@ -116,7 +116,7 @@ clear tmp;
 fid_nts = fopen([top_path 'NTS_TopoCorners_1_' series_label '.csv'],'r');
 tmp = textscan(fid_nts,'%s %s %s %s %s','Delimiter',',','headerlines',1);
 nts_lookup(:,1) = tmp{1,1}(:,1); % sheet
-nts_lookup(:,2) = tmp{1,2};%(:,1); % east
+nts_lookup(:,2) = tmp{1,2}(:,1); % east
 nts_lookup(:,3) = tmp{1,3}(:,1); % west
 nts_lookup(:,4) = tmp{1,4}(:,1); % south
 nts_lookup(:,5) = tmp{1,5}(:,1); % north
