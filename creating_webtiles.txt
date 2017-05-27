@@ -3,6 +3,10 @@ Open OSGeo4W Shell
 > D:
 > cd \Local\AutoGeoRef\1_63360\geotiff
 
+On the Sherman PC:
+E:
+cd Users\brodeujj\GIS\OCUL Topo Project\AutoGeoRef\1_63360\geotiff_clipped
+
 Step 1: Build virtual raster:
 For 1910:
 > gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1907.tif 030M05_1909.tif
@@ -19,34 +23,46 @@ Step 3: Generate tiles:
 
 ### ALL COMMANDS:
 gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1907.tif 030M05_1919.tif 040P01_1916.tif 040P08_1916.tif
-gdal2tiles -s EPSG:4269 -q -r cubic -z 6-17 outputfile.vrt 1919
-gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1923.tif 030M05_1923.tif 040P01_1921.tif 040P08_1923.tif
-gdal2tiles -s EPSG:4269 -q -r cubic -z 6-17 outputfile.vrt 1927
-gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1934.tif 030M05_1931.tif 040P01_1934.tif 040P08_1929.tif
-gdal2tiles -s EPSG:4269 -q -r cubic -z 6-17 outputfile.vrt 1934
-gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1938.tif 030M05_1938.tif 040P01_1940.tif 040P08_1938.tif
-gdal2tiles -s EPSG:4269 -q -r cubic -z 6-17 outputfile.vrt 1943
-gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1952_E.tif 030M04_1952_W.tif 030M05_1952_E.tif 030M05_1952_W.tif040P01_1940.tif040P08_1938.tif
-gdal2tiles -s EPSG:4269 -q -r cubic -z 6-17 outputfile.vrt 1952
-gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1952_E.tif 030M04_1952_W.tif 030M05_1952_E.tif 030M05_1952_W.tif040P01_1956_E.tif040P01_1956_W.tif040P08_1956_E.tif040P08_1956_W.tif
-gdal2tiles -s EPSG:4269 -q -r cubic -z 6-17 outputfile.vrt 1956
-gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1952_E.tif 030M04_1952_W.tif 030M05_1952_E.tif 030M05_1963_W.tif040P01_1956_E.tif040P01_1956_W.tif040P08_1963_E.tif040P08_1963_W.tif
-gdal2tiles -s EPSG:4269 -q -r cubic -z 6-17 outputfile.vrt 1963
-gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1952_E.tif 030M04_1952_W.tif 030M05_1952_E.tif 030M05_1963_W.tif040P01_1956_E.tif040P01_1956_W.tif040P08_1963_E.tif040P08_1963_W.tif
-gdal2tiles -s EPSG:4269 -q -r cubic -z 6-17 outputfile.vrt 1964
-gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1968_E.tif 030M04_1968_W.tif 030M05_1968_E.tif 030M05_1968_W.tif040P01_1956_E.tif040P01_1956_W.tif040P08_1963_E.tif040P08_1963_W.tif
-gdal2tiles -s EPSG:4269 -q -r cubic -z 6-17 outputfile.vrt 1969
-gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1968_E.tif 030M04_1968_W.tif 030M05_1968_E.tif 030M05_1968_W.tif040P01_1972.tif040P08_1972.tif
-gdal2tiles -s EPSG:4269 -q -r cubic -z 6-17 outputfile.vrt 1972
-gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1978.tif 030M05_1978.tif 040P01_1978.tif 040P08_1972.tif
-gdal2tiles -s EPSG:4269 -q -r cubic -z 6-17 outputfile.vrt 1978
-gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1978.tif 030M05_1978.tif 040P01_1978.tif 040P08_1980.tif
-gdal2tiles -s EPSG:4269 -q -r cubic -z 6-17 outputfile.vrt 1980
-gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1984.tif 030M05_1984.tif 040P01_1984.tif 040P08_1984.tif
-gdal2tiles -s EPSG:4269 -q -r cubic -z 6-17 outputfile.vrt 1985
-gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1984.tif 030M05_1984.tif 040P01_1994.tif 040P08_1994.tif
-gdal2tiles -s EPSG:4269 -q -r cubic -z 6-17 outputfile.vrt 1994
-gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1996.tif 030M05_1996.tif 040P01_1994.tif 040P08_1994.tif
-gdal2tiles -s EPSG:4269 -q -r cubic -z 6-17 outputfile.vrt 1997
-gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1996.tif 030M05_1996.tif 040P01_1994.tif 040P08_1998.tif
-gdal2tiles -s EPSG:4269 -q -r cubic -z 6-17 outputfile.vrt 1999
+gdal2tiles -s EPSG:4269 -q -r cubic -z 6-16 outputfile.vrt 1919
+
+gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile2.vrt 030M04_1923.tif 030M05_1923.tif 040P01_1921.tif 040P08_1923.tif
+gdal2tiles -s EPSG:4269 -q -r cubic -z 6-16 outputfile2.vrt 1927
+
+gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile3.vrt 030M04_1934.tif 030M05_1931.tif 040P01_1934.tif 040P08_1929.tif
+gdal2tiles -s EPSG:4269 -q -r cubic -z 6-16 outputfile3.vrt 1934
+
+gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile4.vrt 030M04_1938.tif 030M05_1938.tif 040P01_1940.tif 040P08_1938.tif
+gdal2tiles -s EPSG:4269 -q -r cubic -z 6-16 outputfile4.vrt 1943
+
+gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile.vrt 030M04_1952_E.tif 030M04_1952_W.tif 030M05_1952_E.tif 030M05_1952_W.tif 040P01_1940.tif 040P08_1938.tif
+gdal2tiles -s EPSG:4269 -q -r cubic -z 6-16 outputfile.vrt 1952
+
+gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile5.vrt 030M04_1952_E.tif 030M04_1952_W.tif 030M05_1952_E.tif 030M05_1952_W.tif 040P01_1956_E.tif 040P01_1956_W.tif 040P08_1956_E.tif 040P08_1956_W.tif
+gdal2tiles -s EPSG:4269 -q -r cubic -z 6-16 outputfile5.vrt 1956
+
+gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile11.vrt 030M04_1952_E.tif 030M04_1952_W.tif 030M05_1952_E.tif 030M05_1963_W.tif 040P01_1956_E.tif 040P01_1956_W.tif 040P08_1963_E.tif 040P08_1963_W.tif
+gdal2tiles -s EPSG:4269 -q -r cubic -z 6-16 outputfile11.vrt 1963
+
+gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile6.vrt 030M04_1968_E.tif 030M04_1968_W.tif 030M05_1968_E.tif 030M05_1968_W.tif 040P01_1956_E.tif 040P01_1956_W.tif 040P08_1963_E.tif 040P08_1963_W.tif
+gdal2tiles -s EPSG:4269 -q -r cubic -z 6-16 outputfile6.vrt 1969
+
+gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile7.vrt 030M04_1968_E.tif 030M04_1968_W.tif 030M05_1968_E.tif 030M05_1968_W.tif 040P01_1972.tif 040P08_1972.tif
+gdal2tiles -s EPSG:4269 -q -r cubic -z 6-16 outputfile7.vrt 1972
+
+gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile12.vrt 030M04_1978.tif 030M05_1978.tif 040P01_1978.tif 040P08_1972.tif
+gdal2tiles -s EPSG:4269 -q -r cubic -z 6-16 outputfile12.vrt 1978
+
+gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile8.vrt 030M04_1978.tif 030M05_1978.tif 040P01_1978.tif 040P08_1980.tif
+gdal2tiles -s EPSG:4269 -q -r cubic -z 6-16 outputfile8.vrt 1980
+
+gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile9.vrt 030M04_1984.tif 030M05_1984.tif 040P01_1984.tif 040P08_1984.tif
+gdal2tiles -s EPSG:4269 -q -r cubic -z 6-16 outputfile9.vrt 1985
+
+gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile13.vrt 030M04_1984.tif 030M05_1984.tif 040P01_1994.tif 040P08_1994.tif
+gdal2tiles -s EPSG:4269 -q -r cubic -z 6-16 outputfile13.vrt 1994
+
+gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile10.vrt 030M04_1996.tif 030M05_1996.tif 040P01_1994.tif 040P08_1994.tif
+gdal2tiles -s EPSG:4269 -q -r cubic -z 6-16 outputfile10.vrt 1997
+
+gdalbuildvrt -overwrite -a_srs EPSG:4269 outputfile14.vrt 030M04_1996.tif 030M05_1996.tif 040P01_1994.tif 040P08_1998.tif
+gdal2tiles -s EPSG:4269 -q -r cubic -z 6-16 outputfile14.vrt 1999
