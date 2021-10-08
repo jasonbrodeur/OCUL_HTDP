@@ -46,10 +46,10 @@ ppi_out = 300;
         % x (inches right) | y (inches up) | x_map (lng) | y_map (lat)
         y = C(:,2);
         x = C(:,3);
-        lng = C(:,5); % Northing
-        lat = C(:,4); % Easting
+        lng = C(:,5)/100; % Easting
+        lat = C(:,4)/100; % Northing
         out_pct = 100;
-C_GDAL = [x h-y lng lat];
+C_GDAL = [x y lng lat];
 gdal_str = '';
         for j = 1:1:size(C_GDAL,1)
             gdal_str = [gdal_str '-gcp ' num2str(C_GDAL(j,1),8) ' ' num2str(C_GDAL(j,2),8) ' ' num2str(C_GDAL(j,3),8) ' ' num2str(C_GDAL(j,4),8) ' '];
@@ -83,6 +83,11 @@ gdal_trans_cmd = ['gdal_translate -q -of GTiff -outsize ' num2str(out_pct) '% ' 
   end
   disp(['Transformation of ' filename_in ' was successful.']);
   logfile{i,2} = 'clear!';
+  
+  
+  
+  
+  
   
   %%% if clipping_flag==1, run gdalwarp command again, but clip to the neatline.
   if clipping_flag==1
