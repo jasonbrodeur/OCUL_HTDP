@@ -46,8 +46,8 @@ ppi_out = 300;
         % x (inches right) | y (inches up) | x_map (lng) | y_map (lat)
         y = C(:,2);
         x = C(:,3);
-        lng = C(:,4); % Northing
-        lat = C(:,5); % Easting
+        lng = C(:,5); % Northing
+        lat = C(:,4); % Easting
         out_pct = 100;
 C_GDAL = [x h-y lng lat];
 gdal_str = '';
